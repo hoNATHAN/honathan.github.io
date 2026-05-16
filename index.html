@@ -591,11 +591,25 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       const SUPABASE_URL = "https://krbbkiojxeavgjvxsbhy.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYmJraW9qeGVhdmdqdnhzYmh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODUyOTEsImV4cCI6MjA5NDQ2MTI5MX0.ji268h5RpR0J6R4g6cT3qFfU8IOnj4iAlQ39TiQhLsQ";
-      const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" };
+      const REST = `${SUPABASE_URL}/rest/v1`;
+
+      const db = {
+        async select() {
+          const res = await fetch(`${REST}/guests?select=*&order=section,position`, { headers: HEADERS });
+          return res.json();
+        },
+        async upsert(rows) {
+          await fetch(`${REST}/guests?on_conflict=id`, {
+            method: "POST",
+            headers: { ...HEADERS, Prefer: "resolution=merge-duplicates" },
+            body: JSON.stringify(rows),
+          });
+        },
+      };
 
       const PRICES = {
         10: { total: 2486, pp: 248.6 },
@@ -728,33 +742,19 @@
 
       async function saveGuests() {
         pendingSaves++;
-        const updates = [];
+        const rows = [];
         lists.forEach((list) => {
           [...list.children].forEach((el, idx) => {
-            updates.push({
-              id: el.dataset.id,
-              name: getName(el),
-              section: list.dataset.section,
-              position: idx + 1,
-            });
+            rows.push({ id: el.dataset.id, name: getName(el), section: list.dataset.section, position: idx + 1 });
           });
         });
-        const { error } = await db.from("guests").upsert(updates);
-        if (error) console.error("Save failed:", error);
+        await db.upsert(rows);
         pendingSaves--;
       }
 
       async function loadGuests() {
-        const { data, error } = await db
-          .from("guests")
-          .select("*")
-          .order("section")
-          .order("position");
-
-        if (error) {
-          console.error("Load failed:", error);
-          return;
-        }
+        const data = await db.select();
+        if (!Array.isArray(data)) return;
 
         lists.forEach((list) => {
           while (list.firstChild) list.removeChild(list.firstChild);
@@ -771,11 +771,9 @@
         renumber();
       }
 
-      db.channel("guests-realtime")
-        .on("postgres_changes", { event: "*", schema: "public", table: "guests" }, () => {
-          if (pendingSaves === 0 && !dragEl) loadGuests();
-        })
-        .subscribe();
+      setInterval(() => {
+        if (pendingSaves === 0 && !dragEl) loadGuests();
+      }, 3000);
 
       loadGuests();
 
