@@ -450,6 +450,83 @@
         transform: scale(1.25) rotate(15deg);
         background: rgba(255, 255, 255, 1);
       }
+      #fps-btn {
+        display: block;
+        margin: 14px auto 0;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.55);
+        font-size: 16px;
+        line-height: 28px;
+        cursor: pointer;
+        opacity: 0.7;
+        box-shadow: 0 4px 12px rgba(3, 76, 129, 0.2);
+        transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+      }
+      #fps-btn:hover {
+        opacity: 1;
+        transform: scale(1.25) rotate(-15deg);
+        background: rgba(255, 255, 255, 1);
+      }
+      #fps-overlay {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      #fps-overlay[hidden] { display: none; }
+      .fps-wrap {
+        position: relative;
+      }
+      #fps-canvas {
+        display: block;
+        background: #1a1a2e;
+        cursor: none;
+        border-radius: 8px;
+      }
+      #fps-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.9);
+        color: #034c81;
+        font-weight: 700;
+        cursor: pointer;
+        z-index: 2;
+      }
+      .fps-hud {
+        position: absolute;
+        top: 10px;
+        left: 14px;
+        color: #fff;
+        font-family: "Poppins", sans-serif;
+        font-size: 22px;
+        text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+        letter-spacing: 4px;
+        pointer-events: none;
+      }
+      .fps-score {
+        position: absolute;
+        bottom: 14px;
+        left: 14px;
+        color: #fff;
+        font-family: "Poppins", sans-serif;
+        font-size: 14px;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+        pointer-events: none;
+      }
       #flappy-overlay {
         position: fixed;
         inset: 0;
@@ -581,6 +658,16 @@
 
       <footer>See y'all at the beach 🌊✨</footer>
       <button id="secret-btn" aria-label="secret" title="?">🐚</button>
+      <button id="fps-btn" aria-label="beach" title="?">🏐</button>
+    </div>
+
+    <div id="fps-overlay" hidden>
+      <div class="fps-wrap">
+        <button id="fps-close" aria-label="close">✕</button>
+        <canvas id="fps-canvas" width="720" height="480"></canvas>
+        <div class="fps-hud" id="fps-hearts">♥ ♥ ♥</div>
+        <div class="fps-score" id="fps-score">Kills: 0 · WASD move · click to shoot · ESC to release mouse</div>
+      </div>
     </div>
 
     <div id="flappy-overlay" hidden>
@@ -945,6 +1032,367 @@
           if (overlay.hidden) return;
           if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); flap(); }
           if (e.code === "Escape") close();
+        });
+      })();
+
+      // ===== Secret FPS: Kiki Shooter =====
+      (() => {
+        const overlay = document.getElementById("fps-overlay");
+        const canvas = document.getElementById("fps-canvas");
+        const ctx = canvas.getContext("2d");
+        const heartsEl = document.getElementById("fps-hearts");
+        const scoreEl = document.getElementById("fps-score");
+        const W = canvas.width, H = canvas.height;
+
+        const kikiImg = new Image();
+        kikiImg.src = "kiki.png";
+
+        // Map: 1 = wall, 0 = empty
+        const MAP = [
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
+          [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        ];
+        const MH = MAP.length, MW = MAP[0].length;
+        const FOV = Math.PI / 3;
+        const NUM_RAYS = W;
+        const MAX_DEPTH = 20;
+
+        let player, enemies, bullets, kills, running, rafId, lastTime;
+        const keys = {};
+
+        function isWall(x, y) {
+          const mx = Math.floor(x), my = Math.floor(y);
+          if (mx < 0 || my < 0 || mx >= MW || my >= MH) return true;
+          return MAP[my][mx] === 1;
+        }
+
+        function reset() {
+          player = { x: 2.5, y: 2.5, a: Math.PI / 4, hp: 3, cooldown: 0, hitFlash: 0 };
+          enemies = [];
+          bullets = [];
+          kills = 0;
+          spawnEnemies(4);
+          updateHUD();
+        }
+
+        function findOpenCell() {
+          for (let tries = 0; tries < 100; tries++) {
+            const x = Math.random() * (MW - 2) + 1;
+            const y = Math.random() * (MH - 2) + 1;
+            if (!isWall(x, y)) {
+              const dx = x - player.x, dy = y - player.y;
+              if (dx * dx + dy * dy > 25) return { x, y };
+            }
+          }
+          return { x: MW - 2.5, y: MH - 2.5 };
+        }
+
+        function spawnEnemies(n) {
+          for (let i = 0; i < n; i++) {
+            const p = findOpenCell();
+            enemies.push({ x: p.x, y: p.y, hp: 2, cooldown: 1 + Math.random() * 2, alive: true });
+          }
+        }
+
+        function updateHUD() {
+          heartsEl.textContent = "♥ ".repeat(Math.max(0, player.hp)).trim() || "💀";
+          scoreEl.textContent = `Kills: ${kills} · WASD move · click to shoot · ESC to release mouse`;
+        }
+
+        // DDA raycast — returns distance and hit info
+        function castRay(ox, oy, angle) {
+          const dx = Math.cos(angle), dy = Math.sin(angle);
+          let mx = Math.floor(ox), my = Math.floor(oy);
+          const deltaX = Math.abs(1 / dx), deltaY = Math.abs(1 / dy);
+          let stepX, sideX, stepY, sideY;
+          if (dx < 0) { stepX = -1; sideX = (ox - mx) * deltaX; }
+          else { stepX = 1; sideX = (mx + 1 - ox) * deltaX; }
+          if (dy < 0) { stepY = -1; sideY = (oy - my) * deltaY; }
+          else { stepY = 1; sideY = (my + 1 - oy) * deltaY; }
+          let side = 0;
+          for (let i = 0; i < 64; i++) {
+            if (sideX < sideY) { sideX += deltaX; mx += stepX; side = 0; }
+            else { sideY += deltaY; my += stepY; side = 1; }
+            if (mx < 0 || my < 0 || mx >= MW || my >= MH) return { dist: MAX_DEPTH, side };
+            if (MAP[my][mx] === 1) {
+              const dist = side === 0 ? (mx - ox + (1 - stepX) / 2) / dx : (my - oy + (1 - stepY) / 2) / dy;
+              return { dist: Math.max(0.0001, dist), side };
+            }
+          }
+          return { dist: MAX_DEPTH, side };
+        }
+
+        const zBuffer = new Float32Array(W);
+
+        function renderWorld() {
+          // ceiling
+          ctx.fillStyle = "#0d1b2a";
+          ctx.fillRect(0, 0, W, H / 2);
+          // floor
+          ctx.fillStyle = "#3a3a52";
+          ctx.fillRect(0, H / 2, W, H / 2);
+
+          for (let i = 0; i < NUM_RAYS; i++) {
+            const camX = (2 * i) / NUM_RAYS - 1;
+            const rayAngle = player.a + Math.atan(camX * Math.tan(FOV / 2));
+            const hit = castRay(player.x, player.y, rayAngle);
+            const dist = hit.dist * Math.cos(rayAngle - player.a);
+            zBuffer[i] = dist;
+            const lineH = Math.min(H * 4, (H / dist));
+            const top = (H - lineH) / 2;
+            const shade = Math.max(0, Math.min(255, 255 - dist * 22));
+            const base = hit.side === 1 ? shade * 0.7 : shade;
+            ctx.fillStyle = `rgb(${base | 0}, ${(base * 0.85) | 0}, ${(base * 0.6) | 0})`;
+            ctx.fillRect(i, top, 1, lineH);
+          }
+
+          // Sprites (enemies)
+          const sprites = enemies.filter(e => e.alive).map(e => {
+            const dx = e.x - player.x, dy = e.y - player.y;
+            return { e, dx, dy, d: dx * dx + dy * dy };
+          }).sort((a, b) => b.d - a.d);
+
+          const cosA = Math.cos(-player.a), sinA = Math.sin(-player.a);
+          for (const s of sprites) {
+            // transform into camera space
+            const tx = s.dx * cosA - s.dy * sinA;
+            const ty = s.dx * sinA + s.dy * cosA;
+            if (tx <= 0.05) continue; // behind
+            const screenX = (W / 2) * (1 + ty / (tx * Math.tan(FOV / 2)));
+            const size = Math.min(H * 3, H / tx);
+            const top = (H - size) / 2;
+            const left = screenX - size / 2;
+            // column-by-column draw with z-test
+            const startCol = Math.max(0, Math.floor(left));
+            const endCol = Math.min(W - 1, Math.floor(left + size));
+            for (let col = startCol; col <= endCol; col++) {
+              if (tx < zBuffer[col]) {
+                const u = (col - left) / size;
+                if (kikiImg.complete && kikiImg.naturalWidth) {
+                  const sx = u * kikiImg.naturalWidth;
+                  ctx.drawImage(kikiImg, sx, 0, 1, kikiImg.naturalHeight, col, top, 1, size);
+                }
+              }
+            }
+          }
+
+          // Bullets (enemy projectiles) — draw as glowing dots
+          for (const b of bullets) {
+            const dx = b.x - player.x, dy = b.y - player.y;
+            const tx = dx * cosA - dy * sinA;
+            const ty = dx * sinA + dy * cosA;
+            if (tx <= 0.1) continue;
+            const screenX = (W / 2) * (1 + ty / (tx * Math.tan(FOV / 2)));
+            const r = Math.min(20, 8 / tx);
+            // z-test at center
+            const col = Math.floor(screenX);
+            if (col >= 0 && col < W && tx < zBuffer[col]) {
+              ctx.fillStyle = "#ffeb3b";
+              ctx.beginPath();
+              ctx.arc(screenX, H / 2, r, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "rgba(255, 200, 0, 0.4)";
+              ctx.beginPath();
+              ctx.arc(screenX, H / 2, r * 1.8, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Crosshair
+          ctx.strokeStyle = "rgba(255,255,255,0.85)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(W / 2 - 8, H / 2); ctx.lineTo(W / 2 + 8, H / 2);
+          ctx.moveTo(W / 2, H / 2 - 8); ctx.lineTo(W / 2, H / 2 + 8);
+          ctx.stroke();
+
+          // muzzle flash
+          if (player.cooldown > 0.32) {
+            ctx.fillStyle = `rgba(255, 220, 100, ${(player.cooldown - 0.32) * 4})`;
+            ctx.beginPath();
+            ctx.arc(W / 2, H * 0.85, 60, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // hit flash
+          if (player.hitFlash > 0) {
+            ctx.fillStyle = `rgba(255, 0, 0, ${player.hitFlash * 0.4})`;
+            ctx.fillRect(0, 0, W, H);
+          }
+
+          if (player.hp <= 0) {
+            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.font = "bold 42px Poppins, sans-serif";
+            ctx.fillText("You Died", W / 2, H / 2 - 10);
+            ctx.font = "18px Poppins, sans-serif";
+            ctx.fillText(`Kills: ${kills} · Click to restart`, W / 2, H / 2 + 24);
+          }
+        }
+
+        function tryMove(nx, ny) {
+          const pad = 0.2;
+          if (!isWall(nx + pad, player.y) && !isWall(nx - pad, player.y)) player.x = nx;
+          if (!isWall(player.x, ny + pad) && !isWall(player.x, ny - pad)) player.y = ny;
+        }
+
+        function shoot() {
+          if (player.cooldown > 0 || player.hp <= 0) return;
+          player.cooldown = 0.4;
+          // Find closest enemy under crosshair, occluded by walls
+          let best = null;
+          for (const e of enemies) {
+            if (!e.alive) continue;
+            const dx = e.x - player.x, dy = e.y - player.y;
+            const cosA = Math.cos(-player.a), sinA = Math.sin(-player.a);
+            const tx = dx * cosA - dy * sinA;
+            const ty = dx * sinA + dy * cosA;
+            if (tx <= 0.1) continue;
+            const ang = Math.atan2(ty, tx);
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const aimTol = Math.atan(0.45 / dist); // enemy radius ~0.45
+            if (Math.abs(ang) < aimTol) {
+              // wall check
+              const ra = Math.atan2(dy, dx);
+              const wallHit = castRay(player.x, player.y, ra);
+              if (wallHit.dist > dist - 0.1) {
+                if (!best || dist < best.dist) best = { e, dist };
+              }
+            }
+          }
+          if (best) {
+            best.e.hp--;
+            if (best.e.hp <= 0) {
+              best.e.alive = false;
+              kills++;
+              updateHUD();
+              setTimeout(() => { if (running && player.hp > 0) spawnEnemies(1); }, 1200);
+            }
+          }
+        }
+
+        function update(dt) {
+          if (player.hp <= 0) return;
+          player.cooldown = Math.max(0, player.cooldown - dt);
+          player.hitFlash = Math.max(0, player.hitFlash - dt * 2);
+
+          const speed = 2.5 * dt;
+          const fx = Math.cos(player.a), fy = Math.sin(player.a);
+          const sx = -fy, sy = fx;
+          let mx = 0, my = 0;
+          if (keys["w"]) { mx += fx; my += fy; }
+          if (keys["s"]) { mx -= fx; my -= fy; }
+          if (keys["d"]) { mx += sx; my += sy; }
+          if (keys["a"]) { mx -= sx; my -= sy; }
+          const len = Math.hypot(mx, my);
+          if (len > 0) { mx /= len; my /= len; tryMove(player.x + mx * speed, player.y + my * speed); }
+
+          // Enemies — basic chase + shoot
+          for (const e of enemies) {
+            if (!e.alive) continue;
+            const dx = player.x - e.x, dy = player.y - e.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist > 0.001) {
+              const ux = dx / dist, uy = dy / dist;
+              const espeed = 0.9 * dt;
+              if (dist > 1.2) {
+                const nx = e.x + ux * espeed;
+                const ny = e.y + uy * espeed;
+                if (!isWall(nx, e.y)) e.x = nx;
+                if (!isWall(e.x, ny)) e.y = ny;
+              }
+              e.cooldown -= dt;
+              if (e.cooldown <= 0) {
+                e.cooldown = 1.8 + Math.random() * 1.5;
+                // line of sight check
+                const ra = Math.atan2(dy, dx);
+                const hit = castRay(e.x, e.y, ra);
+                if (hit.dist > dist - 0.1) {
+                  bullets.push({ x: e.x, y: e.y, vx: ux * 3.5, vy: uy * 3.5, life: 3 });
+                }
+              }
+            }
+          }
+
+          // Bullets
+          for (const b of bullets) {
+            b.x += b.vx * dt;
+            b.y += b.vy * dt;
+            b.life -= dt;
+            if (isWall(b.x, b.y)) b.life = 0;
+            const ddx = b.x - player.x, ddy = b.y - player.y;
+            if (ddx * ddx + ddy * ddy < 0.16) {
+              b.life = 0;
+              player.hp--;
+              player.hitFlash = 1;
+              updateHUD();
+            }
+          }
+          bullets = bullets.filter(b => b.life > 0);
+        }
+
+        function loop(t) {
+          if (!running) return;
+          const dt = lastTime ? Math.min(0.05, (t - lastTime) / 1000) : 0.016;
+          lastTime = t;
+          update(dt);
+          renderWorld();
+          rafId = requestAnimationFrame(loop);
+        }
+
+        function open() {
+          overlay.hidden = false;
+          reset();
+          running = true;
+          lastTime = 0;
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(loop);
+          canvas.requestPointerLock?.();
+        }
+        function close() {
+          overlay.hidden = true;
+          running = false;
+          cancelAnimationFrame(rafId);
+          document.exitPointerLock?.();
+        }
+
+        document.getElementById("fps-btn").addEventListener("click", open);
+        document.getElementById("fps-close").addEventListener("click", close);
+
+        document.addEventListener("keydown", (e) => {
+          if (overlay.hidden) return;
+          keys[e.key.toLowerCase()] = true;
+          if (e.key === "Escape") { /* browser will exit pointer lock */ }
+        });
+        document.addEventListener("keyup", (e) => {
+          if (overlay.hidden) return;
+          keys[e.key.toLowerCase()] = false;
+        });
+
+        canvas.addEventListener("click", () => {
+          if (overlay.hidden) return;
+          if (player && player.hp <= 0) { reset(); canvas.requestPointerLock?.(); return; }
+          if (document.pointerLockElement !== canvas) { canvas.requestPointerLock?.(); return; }
+          shoot();
+        });
+
+        document.addEventListener("mousemove", (e) => {
+          if (overlay.hidden || document.pointerLockElement !== canvas) return;
+          player.a += e.movementX * 0.0025;
         });
       })();
     </script>
