@@ -1,377 +1,536 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ocean City 2026 — Guest List</title>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --sand: #fceabb;
-    --sun: #ffb347;
-    --coral: #ff6f61;
-    --teal: #1ca9c9;
-    --deep: #034c81;
-    --foam: #e0f7fa;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ocean City 2026 — Guest List</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --sand: #fceabb;
+        --sun: #ffb347;
+        --coral: #ff6f61;
+        --teal: #1ca9c9;
+        --deep: #034c81;
+        --foam: #e0f7fa;
+      }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  html, body {
-    font-family: 'Poppins', sans-serif;
-    color: #053b5e;
-    background: linear-gradient(180deg, #76d5f5 0%, #1ca9c9 35%, #fceabb 70%, #ffd28a 100%);
-    background-attachment: fixed;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+      html,
+      body {
+        font-family: "Poppins", sans-serif;
+        color: #053b5e;
+        background: linear-gradient(
+          180deg,
+          #76d5f5 0%,
+          #1ca9c9 35%,
+          #fceabb 70%,
+          #ffd28a 100%
+        );
+        background-attachment: fixed;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
 
-  /* Sun */
-  .sun {
-    position: fixed;
-    top: 40px;
-    right: 60px;
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, #fff7b0 10%, #ffb347 70%, transparent 75%);
-    border-radius: 50%;
-    box-shadow: 0 0 80px #ffd66e, 0 0 120px #ffb347;
-    animation: pulse 6s ease-in-out infinite;
-    z-index: 0;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.95; }
-    50% { transform: scale(1.08); opacity: 1; }
-  }
+      /* Sun */
+      .sun {
+        position: fixed;
+        top: 40px;
+        right: 60px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(
+          circle,
+          #fff7b0 10%,
+          #ffb347 70%,
+          transparent 75%
+        );
+        border-radius: 50%;
+        box-shadow:
+          0 0 80px #ffd66e,
+          0 0 120px #ffb347;
+        animation: pulse 6s ease-in-out infinite;
+        z-index: 0;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.95;
+        }
+        50% {
+          transform: scale(1.08);
+          opacity: 1;
+        }
+      }
 
-  /* Floating clouds */
-  .cloud {
-    position: fixed;
-    background: rgba(255,255,255,0.8);
-    border-radius: 50px;
-    filter: blur(1px);
-    animation: drift 60s linear infinite;
-    z-index: 0;
-  }
-  .cloud::before, .cloud::after {
-    content: '';
-    position: absolute;
-    background: rgba(255,255,255,0.85);
-    border-radius: 50%;
-  }
-  .c1 { top: 80px; left: -200px; width: 180px; height: 40px; animation-duration: 80s; }
-  .c1::before { width: 70px; height: 70px; top: -35px; left: 25px; }
-  .c1::after  { width: 50px; height: 50px; top: -25px; left: 90px; }
-  .c2 { top: 200px; left: -300px; width: 140px; height: 30px; animation-duration: 110s; animation-delay: -30s; }
-  .c2::before { width: 55px; height: 55px; top: -28px; left: 20px; }
-  .c2::after  { width: 40px; height: 40px; top: -20px; left: 70px; }
-  @keyframes drift {
-    from { transform: translateX(0); }
-    to   { transform: translateX(140vw); }
-  }
+      /* Floating clouds */
+      .cloud {
+        position: fixed;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50px;
+        filter: blur(1px);
+        animation: drift 60s linear infinite;
+        z-index: 0;
+      }
+      .cloud::before,
+      .cloud::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 50%;
+      }
+      .c1 {
+        top: 80px;
+        left: -200px;
+        width: 180px;
+        height: 40px;
+        animation-duration: 80s;
+      }
+      .c1::before {
+        width: 70px;
+        height: 70px;
+        top: -35px;
+        left: 25px;
+      }
+      .c1::after {
+        width: 50px;
+        height: 50px;
+        top: -25px;
+        left: 90px;
+      }
+      .c2 {
+        top: 200px;
+        left: -300px;
+        width: 140px;
+        height: 30px;
+        animation-duration: 110s;
+        animation-delay: -30s;
+      }
+      .c2::before {
+        width: 55px;
+        height: 55px;
+        top: -28px;
+        left: 20px;
+      }
+      .c2::after {
+        width: 40px;
+        height: 40px;
+        top: -20px;
+        left: 70px;
+      }
+      @keyframes drift {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(140vw);
+        }
+      }
 
-  /* Wave divider */
-  .waves {
-    position: relative;
-    width: 100%;
-    height: 100px;
-    margin-top: -50px;
-    z-index: 1;
-  }
+      /* Wave divider */
+      .waves {
+        position: relative;
+        width: 100%;
+        height: 100px;
+        margin-top: -50px;
+        z-index: 1;
+      }
 
-  .container {
-    position: relative;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 60px 24px 80px;
-    z-index: 2;
-  }
+      .container {
+        position: relative;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 60px 24px 80px;
+        z-index: 2;
+      }
 
-  header {
-    text-align: center;
-    color: #fff;
-    text-shadow: 0 4px 16px rgba(3,76,129,0.45);
-    margin-bottom: 40px;
-  }
-  header h1 {
-    font-family: 'Pacifico', cursive;
-    font-size: clamp(3rem, 8vw, 5.5rem);
-    line-height: 1.1;
-    margin-bottom: 12px;
-    background: linear-gradient(90deg, #fff7b0, #ffb347, #ff6f61, #fff);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 6s ease-in-out infinite;
-    text-shadow: none;
-    filter: drop-shadow(0 4px 14px rgba(3,76,129,0.35));
-  }
-  @keyframes shimmer {
-    0%,100% { background-position: 0% 50%; }
-    50%     { background-position: 100% 50%; }
-  }
-  header .dates {
-    font-size: 1.25rem;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  header .emoji-row {
-    font-size: 2rem;
-    margin-top: 8px;
-    letter-spacing: 10px;
-  }
+      header {
+        text-align: center;
+        color: #fff;
+        text-shadow: 0 4px 16px rgba(3, 76, 129, 0.45);
+        margin-bottom: 40px;
+      }
+      header h1 {
+        font-family: "Pacifico", cursive;
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        line-height: 1.1;
+        margin-bottom: 12px;
+        background: linear-gradient(90deg, #fff7b0, #ffb347, #ff6f61, #fff);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 6s ease-in-out infinite;
+        text-shadow: none;
+        filter: drop-shadow(0 4px 14px rgba(3, 76, 129, 0.35));
+      }
+      @keyframes shimmer {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+      header .dates {
+        font-size: 1.25rem;
+        font-weight: 500;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      header .emoji-row {
+        font-size: 2rem;
+        margin-top: 8px;
+        letter-spacing: 10px;
+      }
 
-  .card {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 22px;
-    padding: 28px 32px;
-    margin-bottom: 28px;
-    box-shadow: 0 12px 40px rgba(3,76,129,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.6);
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 50px rgba(3,76,129,0.25);
-  }
+      .card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 22px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+        box-shadow:
+          0 12px 40px rgba(3, 76, 129, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 50px rgba(3, 76, 129, 0.25);
+      }
 
-  .card h2 {
-    font-family: 'Pacifico', cursive;
-    font-size: 2rem;
-    color: var(--deep);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+      .card h2 {
+        font-family: "Pacifico", cursive;
+        font-size: 2rem;
+        color: var(--deep);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-  .pill {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--coral), var(--sun));
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: .85rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    box-shadow: 0 4px 12px rgba(255,111,97,0.35);
-  }
+      .pill {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--coral), var(--sun));
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 12px rgba(255, 111, 97, 0.35);
+      }
 
-  .price-banner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    justify-content: space-around;
-    background: linear-gradient(135deg, var(--teal), var(--deep));
-    color: #fff;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 16px;
-    box-shadow: 0 10px 28px rgba(3,76,129,0.3);
-  }
-  .price-banner .stat {
-    text-align: center;
-  }
-  .price-banner .stat .value {
-    font-family: 'Pacifico', cursive;
-    font-size: 2.2rem;
-    line-height: 1;
-  }
-  .price-banner .stat .label {
-    font-size: .8rem;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    opacity: .9;
-    margin-top: 4px;
-  }
+      .price-banner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        justify-content: space-around;
+        background: linear-gradient(135deg, var(--teal), var(--deep));
+        color: #fff;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 28px rgba(3, 76, 129, 0.3);
+      }
+      .price-banner .stat {
+        text-align: center;
+      }
+      .price-banner .stat .value {
+        font-family: "Pacifico", cursive;
+        font-size: 2.2rem;
+        line-height: 1;
+      }
+      .price-banner .stat .label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        opacity: 0.9;
+        margin-top: 4px;
+      }
 
-  .airbnb-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: #ff385c;
-    color: #fff;
-    text-decoration: none;
-    padding: 14px 26px;
-    border-radius: 12px;
-    font-weight: 600;
-    box-shadow: 0 8px 22px rgba(255,56,92,0.45);
-    transition: transform .2s ease, box-shadow .2s ease;
-  }
-  .airbnb-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 12px 28px rgba(255,56,92,0.55);
-  }
+      .airbnb-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #ff385c;
+        color: #fff;
+        text-decoration: none;
+        padding: 14px 26px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 22px rgba(255, 56, 92, 0.45);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .airbnb-btn:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 28px rgba(255, 56, 92, 0.55);
+      }
 
-  .guest-list {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
-  }
-  .guest-list li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: linear-gradient(135deg, rgba(28,169,201,0.12), rgba(255,179,71,0.18));
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-weight: 500;
-    border: 1px solid rgba(255,255,255,0.7);
-    transition: transform .2s ease, background .2s ease;
-  }
-  .guest-list li:hover {
-    transform: translateY(-2px) rotate(-1deg);
-    background: linear-gradient(135deg, rgba(255,179,71,0.3), rgba(255,111,97,0.25));
-  }
-  .guest-list .num {
-    background: var(--deep);
-    color: #fff;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .85rem;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
+      .guest-list {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+      }
+      .guest-list li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(
+          135deg,
+          rgba(28, 169, 201, 0.12),
+          rgba(255, 179, 71, 0.18)
+        );
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
+      }
+      .guest-list li:hover {
+        transform: translateY(-2px) rotate(-1deg);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 179, 71, 0.3),
+          rgba(255, 111, 97, 0.25)
+        );
+      }
+      .guest-list .num {
+        background: var(--deep);
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
 
-  .scaling-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-  }
-  .scaling-table th {
-    text-align: left;
-    padding: 8px 14px;
-    font-size: .8rem;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--deep);
-    opacity: .7;
-  }
-  .scaling-table td {
-    background: rgba(255,255,255,0.7);
-    padding: 14px;
-    font-weight: 500;
-  }
-  .scaling-table tr td:first-child { border-radius: 10px 0 0 10px; }
-  .scaling-table tr td:last-child  { border-radius: 0 10px 10px 0; text-align: right; font-family: 'Pacifico', cursive; color: var(--coral); font-size: 1.1rem; }
-  .scaling-table tr:hover td { background: rgba(255,236,179,0.85); }
+      .scaling-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+      }
+      .scaling-table th {
+        text-align: left;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--deep);
+        opacity: 0.7;
+      }
+      .scaling-table td {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 14px;
+        font-weight: 500;
+      }
+      .scaling-table tr td:first-child {
+        border-radius: 10px 0 0 10px;
+      }
+      .scaling-table tr td:last-child {
+        border-radius: 0 10px 10px 0;
+        text-align: right;
+        font-family: "Pacifico", cursive;
+        color: var(--coral);
+        font-size: 1.1rem;
+      }
+      .scaling-table tr:hover td {
+        background: rgba(255, 236, 179, 0.85);
+      }
 
-  .maybe {
-    background: linear-gradient(135deg, #fff3b0, #ffd28a);
-  }
+      .maybe {
+        background: linear-gradient(135deg, #fff3b0, #ffd28a);
+      }
 
-  footer {
-    text-align: center;
-    color: rgba(255,255,255,0.95);
-    text-shadow: 0 2px 8px rgba(3,76,129,0.4);
-    margin-top: 30px;
-    font-family: 'Pacifico', cursive;
-    font-size: 1.4rem;
-  }
+      footer {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.95);
+        text-shadow: 0 2px 8px rgba(3, 76, 129, 0.4);
+        margin-top: 30px;
+        font-family: "Pacifico", cursive;
+        font-size: 1.4rem;
+      }
 
-  /* Floating beach emojis */
-  .floaty {
-    position: fixed;
-    font-size: 1.6rem;
-    opacity: .55;
-    animation: float 12s ease-in-out infinite;
-    z-index: 0;
-    pointer-events: none;
-  }
-  .floaty.f1 { top: 15%; left: 5%; animation-delay: 0s; }
-  .floaty.f2 { top: 35%; right: 8%; animation-delay: -3s; }
-  .floaty.f3 { top: 65%; left: 7%; animation-delay: -6s; }
-  .floaty.f4 { top: 80%; right: 10%; animation-delay: -9s; }
-  @keyframes float {
-    0%,100% { transform: translateY(0) rotate(-5deg); }
-    50%     { transform: translateY(-25px) rotate(5deg); }
-  }
-</style>
-</head>
-<body>
+      /* Floating beach emojis */
+      .floaty {
+        position: fixed;
+        font-size: 1.6rem;
+        opacity: 0.55;
+        animation: float 12s ease-in-out infinite;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .floaty.f1 {
+        top: 15%;
+        left: 5%;
+        animation-delay: 0s;
+      }
+      .floaty.f2 {
+        top: 35%;
+        right: 8%;
+        animation-delay: -3s;
+      }
+      .floaty.f3 {
+        top: 65%;
+        left: 7%;
+        animation-delay: -6s;
+      }
+      .floaty.f4 {
+        top: 80%;
+        right: 10%;
+        animation-delay: -9s;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-5deg);
+        }
+        50% {
+          transform: translateY(-25px) rotate(5deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sun"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <span class="floaty f1">🏖️</span>
+    <span class="floaty f2">🌴</span>
+    <span class="floaty f3">🐚</span>
+    <span class="floaty f4">🍹</span>
 
-<div class="sun"></div>
-<div class="cloud c1"></div>
-<div class="cloud c2"></div>
-<span class="floaty f1">🏖️</span>
-<span class="floaty f2">🌴</span>
-<span class="floaty f3">🐚</span>
-<span class="floaty f4">🍹</span>
+    <div class="container">
+      <header>
+        <h1>Ocean City '26</h1>
+        <div class="dates">June 19 – June 21 · Ocean City, Maryland Beach</div>
+        <div class="emoji-row">🌊 ☀️ 🏖️ 🍹 🌴</div>
+      </header>
 
-<div class="container">
+      <!-- Airbnb -->
+      <div class="card">
+        <h2>🏠 The Spot</h2>
+        <div class="price-banner">
+          <div class="stat">
+            <div class="value">$2,486</div>
+            <div class="label">Total</div>
+          </div>
+          <div class="stat">
+            <div class="value">$248.60</div>
+            <div class="label">Per Person (10)</div>
+          </div>
+          <div class="stat">
+            <div class="value">2 Nights</div>
+            <div class="label">Of Mayhem</div>
+          </div>
+        </div>
+        <a
+          class="airbnb-btn"
+          href="https://www.airbnb.com/rooms/44960106?adults=11&check_in=2026-06-19&check_out=2026-06-21&location=Virginia%20Beach%2C%20VA&search_mode=regular_search&source_impression_id=p3_1778894743_P3MFVq634-2QyAIz&previous_page_section_name=1001&federated_search_id=e1fcd23a-73cc-4fa6-925d-edd7a75a55ef&guests=11"
+          target="_blank"
+          rel="noopener"
+        >
+          🔗 View on Airbnb
+        </a>
+      </div>
 
-  <header>
-    <h1>Ocean City '26</h1>
-    <div class="dates">June 19 – June 21 · Virginia Beach</div>
-    <div class="emoji-row">🌊 ☀️ 🏖️ 🍹 🌴</div>
-  </header>
+      <!-- Confirmed -->
+      <div class="card">
+        <h2>✅ Guaranteed Huzz <span class="pill">Locked In</span></h2>
+        <ul class="guest-list">
+          <li><span class="num">1</span> Tran</li>
+          <li><span class="num">2</span> Jeffrey</li>
+          <li><span class="num">3</span> Kiki</li>
+          <li><span class="num">4</span> Tom</li>
+          <li><span class="num">5</span> Nathan</li>
+          <li><span class="num">6</span> Anthony</li>
+          <li><span class="num">7</span> Dune</li>
+          <li><span class="num">8</span> Navin</li>
+          <li><span class="num">9</span> Henry</li>
+        </ul>
+      </div>
 
-  <!-- Airbnb -->
-  <div class="card">
-    <h2>🏠 The Spot</h2>
-    <div class="price-banner">
-      <div class="stat"><div class="value">$2,486</div><div class="label">Total</div></div>
-      <div class="stat"><div class="value">$248.60</div><div class="label">Per Person (10)</div></div>
-      <div class="stat"><div class="value">2 Nights</div><div class="label">Of Mayhem</div></div>
+      <!-- Maybe -->
+      <div class="card maybe">
+        <h2>🤔 Maybe Goin'</h2>
+        <ul class="guest-list">
+          <li><span class="num">10</span> Sam</li>
+        </ul>
+      </div>
+
+      <!-- Scaling -->
+      <div class="card">
+        <h2>📈 After 10 — Price Scales</h2>
+        <table class="scaling-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Total</th>
+              <th>Per Person</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>11</td>
+              <td>Brandon</td>
+              <td>$2,658</td>
+              <td>$241.64</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Colleen</td>
+              <td>$2,830</td>
+              <td>$235.83</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>Chau</td>
+              <td>$3,002</td>
+              <td>$230.92</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Lisa</td>
+              <td>$3,174</td>
+              <td>$226.71</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>David</td>
+              <td>—</td>
+              <td>$223.07</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer>See y'all at the beach 🌊✨</footer>
     </div>
-    <a class="airbnb-btn" href="https://www.airbnb.com/rooms/44960106?adults=11&check_in=2026-06-19&check_out=2026-06-21&location=Virginia%20Beach%2C%20VA&search_mode=regular_search&source_impression_id=p3_1778894743_P3MFVq634-2QyAIz&previous_page_section_name=1001&federated_search_id=e1fcd23a-73cc-4fa6-925d-edd7a75a55ef&guests=11" target="_blank" rel="noopener">
-      🔗 View on Airbnb
-    </a>
-  </div>
-
-  <!-- Confirmed -->
-  <div class="card">
-    <h2>✅ Guaranteed Huzz <span class="pill">Locked In</span></h2>
-    <ul class="guest-list">
-      <li><span class="num">1</span> Tran</li>
-      <li><span class="num">2</span> Jeffrey</li>
-      <li><span class="num">3</span> Kiki</li>
-      <li><span class="num">4</span> Tom</li>
-      <li><span class="num">5</span> Nathan</li>
-      <li><span class="num">6</span> Anthony</li>
-      <li><span class="num">7</span> Dune</li>
-      <li><span class="num">8</span> Navin</li>
-      <li><span class="num">9</span> Henry</li>
-    </ul>
-  </div>
-
-  <!-- Maybe -->
-  <div class="card maybe">
-    <h2>🤔 Maybe Goin'</h2>
-    <ul class="guest-list">
-      <li><span class="num">10</span> Sam</li>
-    </ul>
-  </div>
-
-  <!-- Scaling -->
-  <div class="card">
-    <h2>📈 After 10 — Price Scales</h2>
-    <table class="scaling-table">
-      <thead>
-        <tr><th>#</th><th>Name</th><th>Total</th><th>Per Person</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>11</td><td>Brandon</td><td>$2,658</td><td>$241.64</td></tr>
-        <tr><td>12</td><td>Colleen</td><td>$2,830</td><td>$235.83</td></tr>
-        <tr><td>13</td><td>Chau</td><td>$3,002</td><td>$230.92</td></tr>
-        <tr><td>14</td><td>Lisa</td><td>$3,174</td><td>$226.71</td></tr>
-        <tr><td>15</td><td>David</td><td>—</td><td>$223.07</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <footer>See y'all at the beach 🌊✨</footer>
-</div>
-
-</body>
+  </body>
 </html>
