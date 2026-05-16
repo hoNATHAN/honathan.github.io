@@ -316,6 +316,29 @@
           rgba(255, 111, 97, 0.25)
         );
       }
+      .guest-list li[draggable="true"] {
+        cursor: grab;
+        user-select: none;
+      }
+      .guest-list li.dragging {
+        opacity: 0.4;
+        cursor: grabbing;
+      }
+      .guest-list.drag-over,
+      .scaling-table tbody.drag-over {
+        outline: 2px dashed var(--coral);
+        outline-offset: 4px;
+        border-radius: 14px;
+      }
+      .guest-list li .name {
+        flex: 1;
+      }
+      .scaling-table tr[draggable="true"] {
+        cursor: grab;
+      }
+      .scaling-table tr.dragging {
+        opacity: 0.4;
+      }
       .guest-list .num {
         background: var(--deep);
         color: #fff;
@@ -462,24 +485,24 @@
       <!-- Confirmed -->
       <div class="card">
         <h2>✅ Guaranteed Huzz <span class="pill">Locked In!!</span></h2>
-        <ul class="guest-list">
-          <li><span class="num">1</span> Tran</li>
-          <li><span class="num">2</span> Jeffrey</li>
-          <li><span class="num">3</span> Kiki</li>
-          <li><span class="num">4</span> Tom</li>
-          <li><span class="num">5</span> Nathan</li>
-          <li><span class="num">6</span> Anthony</li>
-          <li><span class="num">7</span> Dune</li>
-          <li><span class="num">8</span> Navin</li>
-          <li><span class="num">9</span> Henry</li>
+        <ul class="guest-list" id="list-confirmed" data-section="confirmed">
+          <li draggable="true"><span class="num"></span><span class="name">Tran</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Jeffrey</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Kiki</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Tom</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Nathan</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Anthony</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Dune</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Navin</span></li>
+          <li draggable="true"><span class="num"></span><span class="name">Henry</span></li>
         </ul>
       </div>
 
       <!-- Maybe -->
       <div class="card maybe">
         <h2>🤔 Maybe Goin'</h2>
-        <ul class="guest-list">
-          <li><span class="num">10</span> Sam</li>
+        <ul class="guest-list" id="list-maybe" data-section="maybe">
+          <li draggable="true"><span class="num"></span><span class="name">Sam</span></li>
         </ul>
       </div>
 
@@ -495,42 +518,139 @@
               <th>Per Person</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>11</td>
-              <td>Brandon</td>
-              <td>$2,658</td>
-              <td>$241.64</td>
-            </tr>
-            <tr>
-              <td>12</td>
-              <td>Colleen</td>
-              <td>$2,830</td>
-              <td>$235.83</td>
-            </tr>
-            <tr>
-              <td>13</td>
-              <td>Chau</td>
-              <td>$3,002</td>
-              <td>$230.92</td>
-            </tr>
-            <tr>
-              <td>14</td>
-              <td>Lisa</td>
-              <td>$3,174</td>
-              <td>$226.71</td>
-            </tr>
-            <tr>
-              <td>15</td>
-              <td>David</td>
-              <td>$3346</td>
-              <td>$223.07</td>
-            </tr>
+          <tbody id="list-scaling" data-section="scaling">
+            <tr draggable="true"><td class="num"></td><td class="name">Brandon</td><td class="total"></td><td class="pp"></td></tr>
+            <tr draggable="true"><td class="num"></td><td class="name">Colleen</td><td class="total"></td><td class="pp"></td></tr>
+            <tr draggable="true"><td class="num"></td><td class="name">Chau</td><td class="total"></td><td class="pp"></td></tr>
+            <tr draggable="true"><td class="num"></td><td class="name">Lisa</td><td class="total"></td><td class="pp"></td></tr>
+            <tr draggable="true"><td class="num"></td><td class="name">David</td><td class="total"></td><td class="pp"></td></tr>
           </tbody>
         </table>
       </div>
 
       <footer>See y'all at the beach 🌊✨</footer>
     </div>
+
+    <script>
+      // Price lookup keyed by total guest count.
+      const PRICES = {
+        10: { total: 2486, pp: 248.6 },
+        11: { total: 2658, pp: 241.64 },
+        12: { total: 2830, pp: 235.83 },
+        13: { total: 3002, pp: 230.92 },
+        14: { total: 3174, pp: 226.71 },
+        15: { total: 3346, pp: 223.07 },
+      };
+      const fmt = (n) =>
+        "$" + n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+
+      const lists = [
+        document.getElementById("list-confirmed"),
+        document.getElementById("list-maybe"),
+        document.getElementById("list-scaling"),
+      ];
+
+      let dragEl = null;
+
+      function renumber() {
+        let n = 1;
+        lists.forEach((list) => {
+          [...list.children].forEach((item) => {
+            const numEl = item.querySelector(".num");
+            if (numEl) numEl.textContent = n;
+            if (list.dataset.section === "scaling") {
+              const p = PRICES[n] || PRICES[15];
+              item.querySelector(".total").textContent = fmt(p.total);
+              item.querySelector(".pp").textContent = fmt(p.pp);
+            }
+            n++;
+          });
+        });
+      }
+
+      function makeItem(name, section) {
+        if (section === "scaling") {
+          const tr = document.createElement("tr");
+          tr.draggable = true;
+          tr.innerHTML = `<td class="num"></td><td class="name">${name}</td><td class="total"></td><td class="pp"></td>`;
+          attach(tr);
+          return tr;
+        }
+        const li = document.createElement("li");
+        li.draggable = true;
+        li.innerHTML = `<span class="num"></span><span class="name">${name}</span>`;
+        attach(li);
+        return li;
+      }
+
+      function getName(el) {
+        return el.querySelector(".name").textContent;
+      }
+
+      function getAfterElement(container, y) {
+        const items = [...container.children].filter((c) => c !== dragEl);
+        let closest = { offset: Number.NEGATIVE_INFINITY, el: null };
+        for (const item of items) {
+          const box = item.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            closest = { offset, el: item };
+          }
+        }
+        return closest.el;
+      }
+
+      function attach(el) {
+        el.addEventListener("dragstart", (e) => {
+          dragEl = el;
+          el.classList.add("dragging");
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", getName(el));
+        });
+        el.addEventListener("dragend", () => {
+          el.classList.remove("dragging");
+          dragEl = null;
+          lists.forEach((l) => l.classList.remove("drag-over"));
+        });
+      }
+
+      lists.forEach((list) => {
+        list.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          if (!dragEl) return;
+          list.classList.add("drag-over");
+          const targetSection = list.dataset.section;
+          const sourceSection = dragEl.parentElement.dataset.section;
+          // Build a compatible replacement if section type differs (li vs tr).
+          let movingEl = dragEl;
+          if (
+            (targetSection === "scaling" && dragEl.tagName !== "TR") ||
+            (targetSection !== "scaling" && dragEl.tagName === "TR")
+          ) {
+            const name = getName(dragEl);
+            const replacement = makeItem(name, targetSection);
+            replacement.classList.add("dragging");
+            dragEl.remove();
+            dragEl = replacement;
+            movingEl = replacement;
+          }
+          const after = getAfterElement(list, e.clientY);
+          if (after == null) list.appendChild(movingEl);
+          else list.insertBefore(movingEl, after);
+          renumber();
+        });
+        list.addEventListener("dragleave", (e) => {
+          if (!list.contains(e.relatedTarget)) list.classList.remove("drag-over");
+        });
+        list.addEventListener("drop", (e) => {
+          e.preventDefault();
+          list.classList.remove("drag-over");
+          renumber();
+        });
+        [...list.children].forEach(attach);
+      });
+
+      renumber();
+    </script>
   </body>
 </html>
