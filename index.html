@@ -724,7 +724,10 @@
         });
       });
 
+      let pendingSaves = 0;
+
       async function saveGuests() {
+        pendingSaves++;
         const updates = [];
         lists.forEach((list) => {
           [...list.children].forEach((el, idx) => {
@@ -738,6 +741,7 @@
         });
         const { error } = await db.from("guests").upsert(updates);
         if (error) console.error("Save failed:", error);
+        pendingSaves--;
       }
 
       async function loadGuests() {
@@ -766,6 +770,12 @@
 
         renumber();
       }
+
+      db.channel("guests-realtime")
+        .on("postgres_changes", { event: "*", schema: "public", table: "guests" }, () => {
+          if (pendingSaves === 0 && !dragEl) loadGuests();
+        })
+        .subscribe();
 
       loadGuests();
 
