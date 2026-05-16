@@ -460,12 +460,12 @@
         <h2>🏠 The Spot</h2>
         <div class="price-banner">
           <div class="stat">
-            <div class="value">$2,486</div>
+            <div class="value" id="spot-total">$2,486</div>
             <div class="label">Total</div>
           </div>
           <div class="stat">
-            <div class="value">$248.60</div>
-            <div class="label">Per Person (10)</div>
+            <div class="value" id="spot-pp">$248.60</div>
+            <div class="label" id="spot-pp-label">Per Person (10)</div>
           </div>
           <div class="stat">
             <div class="value">2 Nights</div>
@@ -566,6 +566,16 @@
             n++;
           });
         });
+        updateSpotPrice();
+      }
+
+      function updateSpotPrice() {
+        const confirmedCount = document.getElementById("list-confirmed").children.length;
+        const effective = Math.min(Math.max(confirmedCount, 10), 15);
+        const p = PRICES[effective];
+        document.getElementById("spot-total").textContent = fmt(p.total);
+        document.getElementById("spot-pp").textContent = fmt(p.pp);
+        document.getElementById("spot-pp-label").textContent = `Per Person (${effective})`;
       }
 
       function makeItem(name, section) {
