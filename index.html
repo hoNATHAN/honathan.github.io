@@ -554,25 +554,13 @@
       <!-- Confirmed -->
       <div class="card">
         <h2>✅ Guaranteed Huzz <span class="pill">Locked In!!</span></h2>
-        <ul class="guest-list" id="list-confirmed" data-section="confirmed">
-          <li draggable="true"><span class="num"></span><span class="name">Tran</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Jeffrey</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Kiki</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Tom</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Nathan</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Anthony</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Dune</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Navin</span></li>
-          <li draggable="true"><span class="num"></span><span class="name">Henry</span></li>
-        </ul>
+        <ul class="guest-list" id="list-confirmed" data-section="confirmed"></ul>
       </div>
 
       <!-- Maybe -->
       <div class="card maybe">
         <h2>🤔 Maybe Goin'</h2>
-        <ul class="guest-list" id="list-maybe" data-section="maybe">
-          <li draggable="true"><span class="num"></span><span class="name">Sam</span></li>
-        </ul>
+        <ul class="guest-list" id="list-maybe" data-section="maybe"></ul>
       </div>
 
       <!-- Scaling -->
@@ -587,13 +575,7 @@
               <th>Per Person</th>
             </tr>
           </thead>
-          <tbody id="list-scaling" data-section="scaling">
-            <tr draggable="true"><td class="num"></td><td class="name">Brandon</td><td class="total"></td><td class="pp"></td></tr>
-            <tr draggable="true"><td class="num"></td><td class="name">Colleen</td><td class="total"></td><td class="pp"></td></tr>
-            <tr draggable="true"><td class="num"></td><td class="name">Chau</td><td class="total"></td><td class="pp"></td></tr>
-            <tr draggable="true"><td class="num"></td><td class="name">Lisa</td><td class="total"></td><td class="pp"></td></tr>
-            <tr draggable="true"><td class="num"></td><td class="name">David</td><td class="total"></td><td class="pp"></td></tr>
-          </tbody>
+          <tbody id="list-scaling" data-section="scaling"></tbody>
         </table>
       </div>
 
@@ -609,8 +591,12 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      // Price lookup keyed by total guest count.
+      const SUPABASE_URL = "https://krbbkiojxeavgjvxsbhy.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYmJraW9qeGVhdmdqdnhzYmh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODUyOTEsImV4cCI6MjA5NDQ2MTI5MX0.ji268h5RpR0J6R4g6cT3qFfU8IOnj4iAlQ39TiQhLsQ";
+      const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
       const PRICES = {
         10: { total: 2486, pp: 248.6 },
         11: { total: 2658, pp: 241.64 },
@@ -708,15 +694,15 @@
           if (!dragEl) return;
           list.classList.add("drag-over");
           const targetSection = list.dataset.section;
-          const sourceSection = dragEl.parentElement.dataset.section;
-          // Build a compatible replacement if section type differs (li vs tr).
           let movingEl = dragEl;
           if (
             (targetSection === "scaling" && dragEl.tagName !== "TR") ||
             (targetSection !== "scaling" && dragEl.tagName === "TR")
           ) {
             const name = getName(dragEl);
+            const id = dragEl.dataset.id;
             const replacement = makeItem(name, targetSection);
+            replacement.dataset.id = id;
             replacement.classList.add("dragging");
             dragEl.remove();
             dragEl = replacement;
@@ -734,8 +720,8 @@
           e.preventDefault();
           list.classList.remove("drag-over");
           renumber();
+          saveGuests();
         });
-        [...list.children].forEach(attach);
       });
 
       renumber();
