@@ -428,6 +428,75 @@
         right: 10%;
         animation-delay: -9s;
       }
+      #secret-btn {
+        display: block;
+        margin: 30px auto 0;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.55);
+        color: #034c81;
+        font-size: 16px;
+        line-height: 28px;
+        cursor: pointer;
+        opacity: 0.7;
+        box-shadow: 0 4px 12px rgba(3, 76, 129, 0.2);
+        transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+      }
+      #secret-btn:hover {
+        opacity: 1;
+        transform: scale(1.25) rotate(15deg);
+        background: rgba(255, 255, 255, 1);
+      }
+      #flappy-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(3, 30, 60, 0.75);
+        backdrop-filter: blur(6px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #flappy-overlay[hidden] { display: none; }
+      .flappy-modal {
+        position: relative;
+        background: #70c5ce;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+      #flappy-canvas {
+        display: block;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #70c5ce 0%, #4ec0ca 70%, #ded895 70%, #ded895 100%);
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+      #flappy-close {
+        position: absolute;
+        top: -14px;
+        right: -14px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: #fff;
+        color: #034c81;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+      .flappy-hint {
+        text-align: center;
+        color: #fff;
+        margin-top: 10px;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
       @keyframes float {
         0%,
         100% {
@@ -529,6 +598,15 @@
       </div>
 
       <footer>See y'all at the beach 🌊✨</footer>
+      <button id="secret-btn" aria-label="secret" title="?">🐚</button>
+    </div>
+
+    <div id="flappy-overlay" hidden>
+      <div class="flappy-modal">
+        <button id="flappy-close" aria-label="close">✕</button>
+        <canvas id="flappy-canvas" width="360" height="540"></canvas>
+        <div class="flappy-hint">Tap / Space to flap</div>
+      </div>
     </div>
 
     <script>
@@ -661,6 +739,185 @@
       });
 
       renumber();
+
+      // ===== Secret Flappy Bird =====
+      (() => {
+        const overlay = document.getElementById("flappy-overlay");
+        const canvas = document.getElementById("flappy-canvas");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width, H = canvas.height;
+        const GROUND_Y = H * 0.85;
+        const GRAVITY = 0.45;
+        const FLAP = -7.5;
+        const PIPE_W = 56;
+        const GAP = 140;
+        const PIPE_SPEED = 2.2;
+        const PIPE_INTERVAL = 95;
+
+        let bird, pipes, frame, score, best = 0, state, rafId;
+        const birdImg = new Image();
+        birdImg.src = "kiki.png";
+
+        function reset() {
+          bird = { x: 80, y: H / 2, vy: 0, r: 14, rot: 0 };
+          pipes = [];
+          frame = 0;
+          score = 0;
+          state = "ready";
+        }
+
+        function spawnPipe() {
+          const margin = 60;
+          const topMax = GROUND_Y - GAP - margin;
+          const top = margin + Math.random() * (topMax - margin);
+          pipes.push({ x: W, top, passed: false });
+        }
+
+        function flap() {
+          if (state === "ready") state = "play";
+          if (state === "play") bird.vy = FLAP;
+          if (state === "over") reset();
+        }
+
+        function update() {
+          if (state === "play") {
+            bird.vy += GRAVITY;
+            bird.y += bird.vy;
+            bird.rot = Math.max(-0.5, Math.min(1.2, bird.vy / 10));
+            frame++;
+            if (frame % PIPE_INTERVAL === 0) spawnPipe();
+            for (const p of pipes) {
+              p.x -= PIPE_SPEED;
+              if (!p.passed && p.x + PIPE_W < bird.x) {
+                p.passed = true;
+                score++;
+              }
+              // collision
+              if (
+                bird.x + bird.r > p.x &&
+                bird.x - bird.r < p.x + PIPE_W &&
+                (bird.y - bird.r < p.top || bird.y + bird.r > p.top + GAP)
+              ) {
+                gameOver();
+              }
+            }
+            pipes = pipes.filter((p) => p.x + PIPE_W > -10);
+            if (bird.y + bird.r > GROUND_Y || bird.y - bird.r < 0) gameOver();
+          } else if (state === "ready") {
+            bird.y = H / 2 + Math.sin(frame / 12) * 6;
+            frame++;
+          }
+        }
+
+        function gameOver() {
+          state = "over";
+          if (score > best) best = score;
+        }
+
+        function drawBird() {
+          ctx.save();
+          ctx.translate(bird.x, bird.y);
+          ctx.rotate(bird.rot);
+          const size = bird.r * 2.6;
+          if (birdImg.complete && birdImg.naturalWidth) {
+            ctx.drawImage(birdImg, -size / 2, -size / 2, size, size);
+          } else {
+            ctx.fillStyle = "#ffd24d";
+            ctx.beginPath();
+            ctx.arc(0, 0, bird.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        function drawPipe(p) {
+          ctx.fillStyle = "#5cb85c";
+          ctx.strokeStyle = "#2e7d32";
+          ctx.lineWidth = 2;
+          // top
+          ctx.fillRect(p.x, 0, PIPE_W, p.top);
+          ctx.strokeRect(p.x, 0, PIPE_W, p.top);
+          ctx.fillRect(p.x - 4, p.top - 16, PIPE_W + 8, 16);
+          ctx.strokeRect(p.x - 4, p.top - 16, PIPE_W + 8, 16);
+          // bottom
+          const by = p.top + GAP;
+          ctx.fillRect(p.x, by, PIPE_W, GROUND_Y - by);
+          ctx.strokeRect(p.x, by, PIPE_W, GROUND_Y - by);
+          ctx.fillRect(p.x - 4, by, PIPE_W + 8, 16);
+          ctx.strokeRect(p.x - 4, by, PIPE_W + 8, 16);
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          // sky already from canvas bg gradient
+          ctx.fillStyle = "rgba(255,255,255,0.5)";
+          ctx.fillRect(0, GROUND_Y - 1, W, 2);
+          for (const p of pipes) drawPipe(p);
+          drawBird();
+          // ground texture line
+          ctx.fillStyle = "#c9b97a";
+          ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+
+          // score
+          ctx.fillStyle = "#fff";
+          ctx.strokeStyle = "#034c81";
+          ctx.lineWidth = 4;
+          ctx.font = "bold 42px Poppins, sans-serif";
+          ctx.textAlign = "center";
+          ctx.strokeText(String(score), W / 2, 70);
+          ctx.fillText(String(score), W / 2, 70);
+
+          if (state === "ready") {
+            ctx.font = "bold 22px Poppins, sans-serif";
+            ctx.fillStyle = "#fff";
+            ctx.strokeStyle = "#034c81";
+            ctx.lineWidth = 3;
+            ctx.strokeText("Tap to start", W / 2, H / 2 - 80);
+            ctx.fillText("Tap to start", W / 2, H / 2 - 80);
+          } else if (state === "over") {
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(W / 2 - 110, H / 2 - 80, 220, 140);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 28px Poppins, sans-serif";
+            ctx.fillText("Game Over", W / 2, H / 2 - 40);
+            ctx.font = "bold 18px Poppins, sans-serif";
+            ctx.fillText(`Score: ${score}`, W / 2, H / 2 - 5);
+            ctx.fillText(`Best: ${best}`, W / 2, H / 2 + 20);
+            ctx.font = "14px Poppins, sans-serif";
+            ctx.fillText("Tap to retry", W / 2, H / 2 + 50);
+          }
+        }
+
+        function loop() {
+          update();
+          draw();
+          rafId = requestAnimationFrame(loop);
+        }
+
+        function open() {
+          overlay.hidden = false;
+          reset();
+          cancelAnimationFrame(rafId);
+          loop();
+        }
+        function close() {
+          overlay.hidden = true;
+          cancelAnimationFrame(rafId);
+        }
+
+        document.getElementById("secret-btn").addEventListener("click", open);
+        document.getElementById("flappy-close").addEventListener("click", close);
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) close();
+        });
+        canvas.addEventListener("mousedown", (e) => { e.preventDefault(); flap(); });
+        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); flap(); }, { passive: false });
+        window.addEventListener("keydown", (e) => {
+          if (overlay.hidden) return;
+          if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); flap(); }
+          if (e.code === "Escape") close();
+        });
+      })();
     </script>
   </body>
 </html>
