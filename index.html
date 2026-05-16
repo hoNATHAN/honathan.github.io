@@ -724,7 +724,50 @@
         });
       });
 
-      renumber();
+      async function saveGuests() {
+        const updates = [];
+        lists.forEach((list) => {
+          [...list.children].forEach((el, idx) => {
+            updates.push({
+              id: el.dataset.id,
+              name: getName(el),
+              section: list.dataset.section,
+              position: idx + 1,
+            });
+          });
+        });
+        const { error } = await db.from("guests").upsert(updates);
+        if (error) console.error("Save failed:", error);
+      }
+
+      async function loadGuests() {
+        const { data, error } = await db
+          .from("guests")
+          .select("*")
+          .order("section")
+          .order("position");
+
+        if (error) {
+          console.error("Load failed:", error);
+          return;
+        }
+
+        lists.forEach((list) => {
+          while (list.firstChild) list.removeChild(list.firstChild);
+        });
+
+        data.forEach((guest) => {
+          const list = lists.find((l) => l.dataset.section === guest.section);
+          if (!list) return;
+          const el = makeItem(guest.name, guest.section);
+          el.dataset.id = guest.id;
+          list.appendChild(el);
+        });
+
+        renumber();
+      }
+
+      loadGuests();
 
       // ===== Secret Flappy Bird =====
       (() => {
